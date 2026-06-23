@@ -1,115 +1,34 @@
-# Legalize EE
+# legalize-ee
 
-### Eesti õigusaktid Markdown-vormingus, versioonide juhtimisega Git'is.
+Eesti — õigusaktid Markdown-vormingus, versioonihallatuna git-repositooriumina.
 
-Iga seadus on fail. Iga muudatus on commit.
+Iga seadus on fail; iga reform on commit, mille kuupäev vastab tegelikule ametlikule avaldamiskuupäevale. Mis tahes seaduse `git log` näitab selle täielikku ajalugu — millal see jõustus, millised artiklid muutusid ja millise normiga.
 
-**Ametlik allikas:** [Riigi Teataja](https://www.riigiteataja.ee) — Eesti Vabariigi ametlik väljaanne
+Repositoorium katab Riigi Teataja konsolideeritud õigusaktid, mis on piiratud dokumendiliikidega seadus ja määrus (tekstiliigid terviktekst ja algtekst-terviktekst). Iga seadus on eraldi fail ja iga reform on git-commit, mis on dateeritud akti ametliku jõustumiskuupäeva järgi.
 
-Osa projektist [Legalize](https://github.com/legalize-dev/legalize) · [legalize.dev](https://legalize.dev)
+## Mis on sees
 
-> **Algusfaas** — See hoidla on aktiivses arenduses. Failistruktuur, commit'ide ajalugu ja sisu võivad oluliselt muutuda, sealhulgas täielikud uuesti genereerimised.
+- **Seadused** (`{globaalID}.md`) — `ee/115052015002.md`, `ee/122122025002.md`
+- **Määrused** (`{globaalID}.md`) — dokumentLiik = määrus; konsolideeritud terviktekstid.
 
-## Kiire algus
+## Andmeallikas
 
-```bash
-# Eesti õigusaktide kloonimine
-git clone https://github.com/legalize-dev/legalize-ee.git
+- **Riigi Teataja (Eesti Vabariigi ametlik väljaanne)**
+  - Portaal: https://www.riigiteataja.ee
+  - Akti XML: https://www.riigiteataja.ee/akt/{globaalID}.xml
+  - Avaandmed (aastased XML-arhiivid): https://www.riigiteataja.ee/avaandmed/ERT/xml.{YYYY}.zip
 
-# Otsi põhiseaduse esimest paragrahvi
-grep -A 3 "§ 1" ee/24304.md
+Failinimi on alati akti Riigi Teataja globaalID (nt 115052015002). Allikas pakub andmeid avaandmetena aastaste XML-arhiividena (xml.{YYYY}.zip), mida regenereeritakse iga päev. Andmekate algab vaikimisi aastast 2010; varasem sisu (enne 2010) on koondatud arhiivi xml.2010.zip. Pildid jäetakse teadlikult välja.
 
-# Vaata konkreetse seaduse muudatuste ajalugu
-git log --oneline -- ee/22711.md
+## Teised riigid
 
-# Loe Eesti Vabariigi põhiseadust (kõige uuem versioon)
-less ee/24304.md
+See repositoorium on osa projektist **Legalize**, mis haldab mitme riigi õigusakte git-repositooriumitena. Täielik kataloog on aadressil https://legalize.dev.
 
-# Vaata, mis muutus konkreetse reformiga
-git show <commit-sha> -- ee/<seaduse-id>.md
-```
+## Toetamine
 
-## Struktuur
-
-```
-ee/
-  {globaalID}.md         — iga konsolideeritud seadus üks fail
-  ...
-```
-
-Failistruktuur on **lame** — üks kataloog riigi kohta, ilma alamkataloogideta. Dokumendi liik (`seadus`, `määrus`) on iga faili YAML-päises.
-
-Failinimi on iga seadusgrupi (`terviktekstiGrupiID`) **kõige vanem `globaalID`**, mis tagab failinime stabiilsuse läbi kõigi reformide.
-
-## Vorming
-
-Iga fail on Markdown koos YAML-päisega:
-
-```yaml
----
-title: "Eesti Vabariigi põhiseadus"
-identifier: "24304"
-country: "ee"
-rank: "seadus"
-publication_date: "2002-06-01"
-last_updated: "2026-04-07"
-status: "in_force"
-source: "https://www.riigiteataja.ee/akt/24304"
-department: "Rahvahääletusel vastu võetud"
-short_title: "PS"
-text_type: "terviktekst"
-adoption_date: "1992-06-28"
-original_effective_date: "1992-07-03"
-original_publication: "RT, 1992, 26, 349"
-rt_section: "RT I"
-group_id: "151381"
-schema: "tyviseadus_1_10.02.2010.xsd"
----
-# Eesti Vabariigi põhiseadus
-
-Kõikumatus usus ja vankumatus tahtes...
-
-### I. peatükk ÜLDSÄTTED
-
-##### § 1.
-
-(1) Eesti on iseseisev ja sõltumatu demokraatlik vabariik...
-```
-
-Hierarhia kaardistus:
-
-| Eesti | Markdown |
-|---|---|
-| `osa` (osa) | `## N. osa PEALKIRI` |
-| `peatykk` (peatükk) | `### N. peatükk Pealkiri` |
-| `jagu` (jagu) | `#### N. jagu Pealkiri` |
-| `paragrahv` (paragrahv §) | `##### § N. Pealkiri` |
-| `loige` (lõige) | `(N) tekst` |
-| `punkt` / `alampunkt` | `N) tekst` |
-
-## Commit'ide ajalugu = õiguslik ajalugu
-
-Iga commit vastab konkreetsele konsolideeritud versioonile, mis avaldati Riigi Teatajas. Commit'i kuupäev on `kehtivuseAlgus` — kuupäev, mil see versioon jõustus.
-
-```bash
-# Vaata seaduse 24304 täielikku ajalugu (Põhiseadus)
-git log --format="%ai %s" -- ee/24304.md
-
-# Vaata, mis muutus konkreetse reformiga
-git show <commit-sha> -- ee/24304.md
-
-# Vaata kahe versiooni vahelist erinevust
-git diff <commit1>..<commit2> -- ee/24304.md
-```
-
-## Andmed
-
-Kõik andmed pärinevad Riigi Teataja avaandmete portaalist (`avaandmed/ERT/`), mis avaldatakse iga päev XML-vormingus. Genereerimispipeline on saadaval [legalize-dev/legalize-pipeline](https://github.com/legalize-dev/legalize-pipeline).
-
-**Eesti seadusandlus on autoriõigusega kaitsmata** Eesti Autoriõiguse seaduse alusel ja on avalikus omandis. Tasuta taaskasutus on lubatud.
+Legalize on tasuta ja avatud. Kui sellest tööst on sulle kasu, saad aidata katta selle majutus- ja arenduskulusid: [Toeta seda projekti](https://buymeacoffee.com/legalizedev).
 
 ## Litsents
 
-MIT — vt [LICENSE](LICENSE)
-
-Käesolevas hoidlas sisalduvad seadusetekstid ise on **avalik omand** Eesti seaduse järgi.
+- **Pipeline'i kood**: MIT (https://github.com/legalize-dev/legalize-pipeline)
+- **Andmed**: avalik omand (ametlikud riiklikud väljaanded)
